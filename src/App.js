@@ -1,28 +1,58 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from 'react';
+import List from './components/List/List';
+import axios from 'axios';
+
 import './App.css';
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      input: '',
+      data: {},
+    };
   }
+
+  componentDidMount() {
+    this.fetchIP().then(data => this.setState({input : data }));
+  }
+
+  queryIP = () => {
+    return axios.get(`https://ip.nf/${this.state.input}.json`)
+      .then((response) => {
+        console.log(response);
+        this.setState({ data: response.data.ip });
+      })
+      .catch(function (error) { 
+        console.error(error);
+      });
+  }
+
+  fetchIP = () => {
+    return axios.get('https://ip.nf/me.json')
+      .then(function (response) {
+        return response.data.ip.ip;
+      })
+      .catch(function (error) { 
+        console.error(error);
+      });
+  }
+
+  inputOnChange = (event) => {
+    this.setState({ input: event.currentTarget.value});
+  }
+
+	render() {
+		return (
+			<div className="App">
+				<div>
+					<input value={this.state.input} onChange={this.inputOnChange} placeholder="Enter an IP!" />
+					<button onClick={this.queryIP}>Press Me</button>
+				</div>
+				<List data={this.state.data}/>
+			</div>
+		);
+	}
 }
 
 export default App;
